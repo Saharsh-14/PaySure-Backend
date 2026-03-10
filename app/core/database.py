@@ -1,15 +1,19 @@
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, declarative_base
-import os
-from dotenv import load_dotenv
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import declarative_base
+from app.core.config import settings
 
-# Load environment variables from .env
-load_dotenv()
+# Use the formatted URL which handles Neon SSL requirements
+DATABASE_URL = settings.get_database_url
 
-DATABASE_URL = os.getenv("DATABASE_URL")
-
-# Create database engine
-engine = create_engine(DATABASE_URL)
+# Step 2: SQLAlchemy Engine Setup for Serverless
+# Configure connection pooling limits, pool_pre_ping to check for severed connections
+engine = create_engine(
+    DATABASE_URL,
+    pool_pre_ping=True,  # Crucial for Neon to handle serverless connection drops
+    pool_size=5,         # Keep base connection pool small
+    max_overflow=10      # Allow up to 10 extra temporary connections during bursts
+)
 
 # Create session factory
 SessionLocal = sessionmaker(
@@ -21,8 +25,7 @@ SessionLocal = sessionmaker(
 # Base class for models
 Base = declarative_base()
 
-
-# Dependency to get DB session
+# Step 6: Database Session Dependency (already correctly implemented)
 def get_db():
     db = SessionLocal()
     try:

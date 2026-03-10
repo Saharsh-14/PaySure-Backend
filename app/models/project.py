@@ -1,8 +1,16 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
+from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Enum
 from sqlalchemy.orm import relationship
 from datetime import datetime
+import enum
 
 from app.core.database import Base
+
+
+class ProjectStatus(str, enum.Enum):
+    pending = "pending"
+    active = "active"
+    completed = "completed"
+    cancelled = "cancelled"
 
 
 class Project(Base):
@@ -13,15 +21,12 @@ class Project(Base):
     title = Column(String, nullable=False)
     description = Column(String, nullable=True)
 
-    client_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    freelancer_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    client_id = Column(String, nullable=False, index=True)
+    freelancer_id = Column(String, nullable=True, index=True)
 
-    status = Column(String, default="pending")
-    # pending / active / completed / cancelled
+    status = Column(Enum(ProjectStatus), default=ProjectStatus.pending)
 
     created_at = Column(DateTime, default=datetime.utcnow)
 
     # Relationships
-    client = relationship("User", foreign_keys=[client_id])
-    freelancer = relationship("User", foreign_keys=[freelancer_id])
     milestones = relationship("Milestone", back_populates="project")

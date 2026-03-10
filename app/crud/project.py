@@ -24,8 +24,8 @@ def get_project_by_id(db: Session, project_id: int):
 
 
 # Get all projects for a client
-def get_projects_by_client(db: Session, client_id: int):
-    return db.query(Project).filter(Project.client_id == client_id).all()
+def get_projects_by_client(db: Session, client_id: int, skip: int = 0, limit: int = 100):
+    return db.query(Project).filter(Project.client_id == client_id).offset(skip).limit(limit).all()
 
 
 # Assign freelancer to project

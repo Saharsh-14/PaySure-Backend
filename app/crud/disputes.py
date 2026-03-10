@@ -2,10 +2,10 @@ from sqlalchemy.orm import Session
 from app.models.disputes import Dispute
 
 
-def create_dispute(db: Session, milestone_id: int, user_id: int, reason: str):
+def create_dispute(db: Session, milestone_id: int, clerk_id: str, reason: str):
     dispute = Dispute(
         milestone_id=milestone_id,
-        raised_by=user_id,
+        raised_by=clerk_id,
         reason=reason,
         status="open"
     )

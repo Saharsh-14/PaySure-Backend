@@ -1,7 +1,21 @@
-from sqlalchemy import Column, Integer, Float, String, ForeignKey, DateTime
+from sqlalchemy import Column, Integer, Float, String, ForeignKey, DateTime, Enum
+from sqlalchemy.orm import relationship
 from datetime import datetime
+import enum
 
 from app.core.database import Base
+
+
+class TransactionStatus(str, enum.Enum):
+    pending = "pending"
+    completed = "completed"
+    failed = "failed"
+    refunded = "refunded"
+
+class TransactionType(str, enum.Enum):
+    deposit = "deposit"
+    release = "release"
+    refund = "refund"
 
 
 class Transaction(Base):
@@ -11,15 +25,16 @@ class Transaction(Base):
 
     milestone_id = Column(Integer, ForeignKey("milestones.id"), nullable=False)
 
-    payer_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    receiver_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    payer_id = Column(String, nullable=False, index=True)
+    receiver_id = Column(String, nullable=False, index=True)
 
     amount = Column(Float, nullable=False)
 
-    status = Column(String, default="pending")
-    # pending / completed / failed / refunded
+    status = Column(Enum(TransactionStatus), default=TransactionStatus.pending)
 
-    transaction_type = Column(String, nullable=False)
-    # deposit / release / refund
+    transaction_type = Column(Enum(TransactionType), nullable=False)
 
     created_at = Column(DateTime, default=datetime.utcnow)
+
+    # Relationships
+    milestone = relationship("Milestone", back_populates="transactions")

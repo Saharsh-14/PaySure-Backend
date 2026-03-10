@@ -20,8 +20,8 @@ def create_milestone(db: Session, title: str, description: str, amount: float, p
 
 
 # Get milestones by project
-def get_milestones_by_project(db: Session, project_id: int):
-    return db.query(Milestone).filter(Milestone.project_id == project_id).all()
+def get_milestones_by_project(db: Session, project_id: int, skip: int = 0, limit: int = 100):
+    return db.query(Milestone).filter(Milestone.project_id == project_id).offset(skip).limit(limit).all()
 
 
 # Get milestone by ID

@@ -1,18 +1,16 @@
-from app.services.escrow_service import release_payment
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
 
 from app.core.database import get_db
 from app.schemas.milestone import MilestoneCreate, MilestoneResponse
-from app.crud.milestone import (
-    create_milestone,
-    get_milestones_by_project,
-    get_milestone_by_id,
-    update_milestone_status
+from app.services.milestone_service import (
+    create_milestone_service,
+    get_project_milestones_service,
+    mark_milestone_completed_service,
+    approve_milestone_service
 )
-from app.crud.project import get_project_by_id
-from app.api.deps import get_current_user
+from app.api.deps import get_current_user, RoleChecker
 
 router = APIRouter(prefix="/milestones", tags=["Milestones"])
 
@@ -24,24 +22,9 @@ router = APIRouter(prefix="/milestones", tags=["Milestones"])
 def create_new_milestone(
     milestone: MilestoneCreate,
     db: Session = Depends(get_db),
-    current_user = Depends(get_current_user)
+    current_user = Depends(RoleChecker(["client"]))
 ):
-
-    project = get_project_by_id(db, milestone.project_id)
-
-    if not project:
-        raise HTTPException(status_code=404, detail="Project not found")
-
-    if project.client_id != current_user.id:
-        raise HTTPException(status_code=403, detail="Not authorized")
-
-    return create_milestone(
-        db,
-        title=milestone.title,
-        description=milestone.description,
-        amount=milestone.amount,
-        project_id=milestone.project_id
-    )
+    return create_milestone_service(db, milestone, current_user)
 
 
 # ---------------------------
@@ -50,11 +33,12 @@ def create_new_milestone(
 @router.get("/{project_id}", response_model=List[MilestoneResponse])
 def get_project_milestones(
     project_id: int,
+    skip: int = 0,
+    limit: int = 100,
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user)
 ):
-
-    return get_milestones_by_project(db, project_id)
+    return get_project_milestones_service(db, project_id, skip=skip, limit=limit)
 
 
 # ---------------------------
@@ -64,20 +48,9 @@ def get_project_milestones(
 def mark_completed(
     milestone_id: int,
     db: Session = Depends(get_db),
-    current_user = Depends(get_current_user)
+    current_user = Depends(RoleChecker(["freelancer"]))
 ):
-
-    milestone = get_milestone_by_id(db, milestone_id)
-
-    if not milestone:
-        raise HTTPException(status_code=404, detail="Milestone not found")
-
-    project = get_project_by_id(db, milestone.project_id)
-
-    if project.freelancer_id != current_user.id:
-        raise HTTPException(status_code=403, detail="Not authorized")
-
-    return update_milestone_status(db, milestone_id, "completed")
+    return mark_milestone_completed_service(db, milestone_id, current_user)
 
 
 # ---------------------------
@@ -87,25 +60,7 @@ def mark_completed(
 def approve_milestone(
     milestone_id: int,
     db: Session = Depends(get_db),
-    current_user = Depends(get_current_user)
+    current_user = Depends(RoleChecker(["client"]))
 ):
-
-    milestone = get_milestone_by_id(db, milestone_id)
-
-    if not milestone:
-        raise HTTPException(status_code=404, detail="Milestone not found")
-
-    project = get_project_by_id(db, milestone.project_id)
-
-    if project.client_id != current_user.id:
-        raise HTTPException(status_code=403, detail="Not authorized")
-
-    # Step 1: Mark milestone approved
-    update_milestone_status(db, milestone_id, "approved")
-
-    # Step 2: Release payment (escrow logic)
-    release_payment(db, milestone_id)
-
-    # Step 3: Return updated milestone
-    return get_milestone_by_id(db, milestone_id)
+    return approve_milestone_service(db, milestone_id, current_user)
 

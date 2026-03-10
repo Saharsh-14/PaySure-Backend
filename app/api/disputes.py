@@ -3,14 +3,13 @@ from sqlalchemy.orm import Session
 from typing import List
 
 from app.core.database import get_db
-from app.api.deps import get_current_user
+from app.api.deps import get_current_user, RoleChecker
 from app.schemas.disputes import DisputeCreate, DisputeResponse
-from app.crud.disputes import (
-    create_dispute,
-    get_disputes_by_milestone,
-    resolve_dispute
+from app.services.dispute_service import (
+    raise_dispute_service,
+    get_milestone_disputes_service,
+    resolve_dispute_api_service
 )
-from app.crud.milestone import get_milestone_by_id
 
 router = APIRouter(prefix="/disputes", tags=["Disputes"])
 
@@ -22,18 +21,7 @@ def raise_dispute(
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user)
 ):
-
-    milestone = get_milestone_by_id(db, dispute.milestone_id)
-
-    if not milestone:
-        raise HTTPException(status_code=404, detail="Milestone not found")
-
-    return create_dispute(
-        db,
-        milestone_id=dispute.milestone_id,
-        user_id=current_user.id,
-        reason=dispute.reason
-    )
+    return raise_dispute_service(db, dispute, current_user)
 
 
 # Get disputes for milestone
@@ -43,8 +31,7 @@ def get_milestone_disputes(
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user)
 ):
-
-    return get_disputes_by_milestone(db, milestone_id)
+    return get_milestone_disputes_service(db, milestone_id)
 
 
 # Resolve dispute (Admin only)
@@ -53,10 +40,6 @@ def resolve_dispute_api(
     dispute_id: int,
     resolution_note: str,
     db: Session = Depends(get_db),
-    current_user = Depends(get_current_user)
+    current_user = Depends(RoleChecker(["admin"]))
 ):
-
-    if current_user.role != "admin":
-        raise HTTPException(status_code=403, detail="Only admin can resolve disputes")
-
-    return resolve_dispute(db, dispute_id, resolution_note)
+    return resolve_dispute_api_service(db, dispute_id, resolution_note, current_user)

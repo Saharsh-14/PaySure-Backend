@@ -1,8 +1,16 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, Float, DateTime
+from sqlalchemy import Column, Integer, String, ForeignKey, Float, DateTime, Enum
 from sqlalchemy.orm import relationship
+import enum
 from datetime import datetime
 
 from app.core.database import Base
+
+
+class MilestoneStatus(str, enum.Enum):
+    pending = "pending"
+    completed = "completed"
+    approved = "approved"
+    rejected = "rejected"
 
 
 class Milestone(Base):
@@ -15,12 +23,13 @@ class Milestone(Base):
 
     amount = Column(Float, nullable=False)
 
-    status = Column(String, default="pending")
-    # pending / completed / approved / rejected
+    status = Column(Enum(MilestoneStatus), default=MilestoneStatus.pending)
 
     project_id = Column(Integer, ForeignKey("projects.id"), nullable=False)
 
     created_at = Column(DateTime, default=datetime.utcnow)
 
-    # Relationship back to project
+    # Relationships
     project = relationship("Project", back_populates="milestones")
+    transactions = relationship("Transaction", back_populates="milestone")
+    disputes = relationship("Dispute", back_populates="milestone")

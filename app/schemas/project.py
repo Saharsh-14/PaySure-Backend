@@ -1,23 +1,20 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
+from pydantic import BaseModel, Field
+from typing import Optional
 from datetime import datetime
 
-from app.core.database import Base
+class ProjectBase(BaseModel):
+    title: str = Field(..., min_length=3, max_length=100, description="The title of the project")
+    description: Optional[str] = Field(None, max_length=1000, description="Detailed description of the project requirements")
 
+class ProjectCreate(ProjectBase):
+    pass
 
-class Dispute(Base):
-    __tablename__ = "disputes"
+class ProjectResponse(ProjectBase):
+    id: int
+    client_id: str
+    freelancer_id: Optional[str] = None
+    status: str
+    created_at: datetime
 
-    id = Column(Integer, primary_key=True, index=True)
-
-    milestone_id = Column(Integer, ForeignKey("milestones.id"), nullable=False)
-
-    raised_by = Column(Integer, ForeignKey("users.id"), nullable=False)
-
-    reason = Column(String, nullable=False)
-
-    status = Column(String, default="open")
-    # open / under_review / resolved / rejected
-
-    resolution_note = Column(String, nullable=True)
-
-    created_at = Column(DateTime, default=datetime.utcnow)
+    class Config:
+        from_attributes = True
