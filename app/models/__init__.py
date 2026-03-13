@@ -5,3 +5,4 @@ from app.models.disputes import Dispute, DisputeStatus
 from app.models.wallet import Wallet
 from app.models.wallet_ledger import WalletLedger, LedgerEntryType
 from app.models.user import User, UserRole
+from app.models.connection import Connection, ConnectionStatus

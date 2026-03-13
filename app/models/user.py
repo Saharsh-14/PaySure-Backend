@@ -9,7 +9,7 @@ class UserRole(str, enum.Enum):
     FREELANCER = "Freelancer"
 
 class User(Base):
-    __tablename__ = "users"
+    __tablename__ = "clerks"
 
     clerk_id = Column(String, primary_key=True, index=True)
     email = Column(String, unique=True, index=True, nullable=False)

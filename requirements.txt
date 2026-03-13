@@ -10,3 +10,4 @@ slowapi
 redis
 alembic
 svix
+cryptography

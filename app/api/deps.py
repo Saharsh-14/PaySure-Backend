@@ -42,7 +42,9 @@ class RoleChecker:
         self.allowed_roles = allowed_roles
 
     def __call__(self, current_user: CurrentUser = Depends(get_current_user)):
-        if current_user.role not in self.allowed_roles:
+        # Case-insensitive role check
+        allowed_lower = [r.lower() for r in self.allowed_roles]
+        if current_user.role.lower() not in allowed_lower:
             logger.warning("unauthorized_role_access", user_id=current_user.clerk_id, role=current_user.role, allowed=self.allowed_roles)
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,

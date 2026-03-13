@@ -8,6 +8,7 @@ from app.api import admin
 from app.api import webhooks
 from app.api import milestones
 from app.api import connections
+from app.api import users
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from app.core.rate_limiter import limiter
@@ -65,14 +66,19 @@ async def add_process_time_header(request: Request, call_next):
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
-app.include_router(projects.router)
-app.include_router(milestones.router)
-app.include_router(connections.router)
-app.include_router(transaction.router)
-app.include_router(disputes.router)
-app.include_router(wallet.router)
-app.include_router(admin.router)
-app.include_router(webhooks.router, prefix="/api")
+from fastapi import APIRouter
+v1_router = APIRouter(prefix="/api/v1")
+v1_router.include_router(projects.router)
+v1_router.include_router(milestones.router)
+v1_router.include_router(connections.router)
+v1_router.include_router(transaction.router)
+v1_router.include_router(disputes.router)
+v1_router.include_router(wallet.router)
+v1_router.include_router(admin.router)
+v1_router.include_router(users.router)
+v1_router.include_router(webhooks.router)
+
+app.include_router(v1_router)
 
 @app.get("/health", tags=["System"])
 def health_check(db: Session = Depends(get_db)):

@@ -45,7 +45,7 @@ def get_my_projects(
 @router.put("/{project_id}/assign/{freelancer_id}", response_model=ProjectResponse)
 def assign_project_freelancer(
     project_id: int,
-    freelancer_id: int,
+    freelancer_id: str,
     db: Session = Depends(get_db),
     current_user = Depends(RoleChecker(["client"]))
 ):

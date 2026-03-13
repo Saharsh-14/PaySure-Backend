@@ -1,4 +1,5 @@
 from sqlalchemy import Column, Integer, String, DateTime, Enum, ForeignKey
+from sqlalchemy.orm import relationship
 import enum
 from datetime import datetime
 from app.core.database import Base
@@ -23,7 +24,11 @@ class Connection(Base):
     client_id = Column(String, nullable=False, index=True)
     freelancer_id = Column(String, nullable=False, index=True)
 
-    status = Column(Enum(ConnectionStatus), default=ConnectionStatus.ACTIVE) # Simulating auto-accept for now as per "invite" requirements
+    status = Column(Enum(ConnectionStatus), default=ConnectionStatus.PENDING)
     
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # Relationships
+    sender = relationship("User", foreign_keys=[sender_id], primaryjoin="Connection.sender_id == User.clerk_id")
+    recipient = relationship("User", foreign_keys=[recipient_id], primaryjoin="Connection.recipient_id == User.clerk_id")

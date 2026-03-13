@@ -7,7 +7,7 @@ class ProjectBase(BaseModel):
     description: Optional[str] = Field(None, max_length=1000, description="Detailed description of the project requirements")
 
 class ProjectCreate(ProjectBase):
-    pass
+    other_party_email: str = Field(..., description="Email of the client or freelancer to assign to the project")
 
 class ProjectResponse(ProjectBase):
     id: int

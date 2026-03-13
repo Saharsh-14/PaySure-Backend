@@ -1,5 +1,5 @@
-# Update imports for Pydantic v2
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
+import os
 
 class Settings(BaseSettings):
     DATABASE_URL: str
@@ -7,12 +7,13 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
     CLERK_WEBHOOK_SECRET: str = "whsec_placeholder"
-    CLERK_JWKS_URL: str = "https://api.clerk.dev/v1/jwks"
+    CLERK_SECRET_KEY: str = "sk_test_placeholder"
+    CLERK_JWKS_URL: str = "https://summary-lioness-53.clerk.accounts.dev/.well-known/jwks.json"
 
-    class Config:
-        import os
-        env_file = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), ".env")
-        extra = "ignore"
+    model_config = SettingsConfigDict(
+        env_file=os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), ".env"),
+        extra="ignore"
+    )
         
     @property
     def get_database_url(self) -> str:
@@ -24,6 +25,5 @@ class Settings(BaseSettings):
             else:
                 url += "?sslmode=require"
         return url
-
 
 settings = Settings()

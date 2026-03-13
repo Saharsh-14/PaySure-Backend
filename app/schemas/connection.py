@@ -14,5 +14,11 @@ class ConnectionResponse(BaseModel):
     freelancer_id: str
     status: ConnectionStatus
     created_at: datetime
+    
+    # Extra fields for UI convenience
+    sender_name: Optional[str] = None
+    sender_email: Optional[str] = None
+    recipient_name: Optional[str] = None
+    recipient_email: Optional[str] = None
 
     model_config = ConfigDict(from_attributes=True)
