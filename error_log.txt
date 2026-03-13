@@ -1,0 +1,44 @@
+﻿python : Traceback (most recent call last):
+At line:1 char:1
++ python -c "import app.main" 2>&1 | Out-File -FilePath 
+"error_log.txt" ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Traceback  
+   (most recent call last)::String) [], RemoteExceptio  
+  n
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+  File "<string>", line 1, in <module>
+  File "C:\Users\Asus\OneDrive\Desktop\Paysure\paysure-b
+ackend\app\main.py", line 3, in <module>
+    from app.api import projects
+  File "C:\Users\Asus\OneDrive\Desktop\Paysure\paysure-b
+ackend\app\api\projects.py", line 5, in <module>
+    from app.core.database import get_db
+  File "C:\Users\Asus\OneDrive\Desktop\Paysure\paysure-b
+ackend\app\core\database.py", line 4, in <module>
+    from app.core.config import settings
+  File "C:\Users\Asus\OneDrive\Desktop\Paysure\paysure-b
+ackend\app\core\config.py", line 29, in <module>
+    settings = Settings()
+               ^^^^^^^^^^
+  File "C:\Users\Asus\AppData\Local\Programs\Python\Pyth
+on312\Lib\site-packages\pydantic_settings\main.py", 
+line 242, in __init__
+    super().__init__(**__pydantic_self__.__class__._sett
+ings_build_values(sources, init_kwargs))
+  File "C:\Users\Asus\AppData\Local\Programs\Python\Pyth
+on312\Lib\site-packages\pydantic\main.py", line 250, in 
+__init__
+    validated_self = 
+self.__pydantic_validator__.validate_python(data, 
+self_instance=self)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+pydantic_core._pydantic_core.ValidationError: 1 
+validation error for Settings
+DATABASE_URL
+  Field required [type=missing, input_value={}, 
+input_type=dict]
+    For further information visit 
+https://errors.pydantic.dev/2.12/v/missing
