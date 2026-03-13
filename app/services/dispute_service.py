@@ -12,6 +12,8 @@ from app.crud.milestone import get_milestone_by_id
 from app.services.notification_service import send_notification
 from app.core.logger import logger
 
+from app.services.milestone_service import dispute_milestone_service
+
 def raise_dispute_service(db: Session, dispute: DisputeCreate, current_user):
     """Business logic for raising a dispute."""
     milestone = get_milestone_by_id(db, dispute.milestone_id)
@@ -19,20 +21,14 @@ def raise_dispute_service(db: Session, dispute: DisputeCreate, current_user):
     if not milestone:
         raise HTTPException(status_code=404, detail="Milestone not found")
 
-    # Fraud Detection: check for excessive open disputes for this user
-    open_disputes_count = db.query(Dispute).filter(Dispute.raised_by == current_user.id, Dispute.status == "open").count()
-    if open_disputes_count >= 3:
-        logger.warning(
-            "fraud_flag_excessive_disputes", 
-            clerk_id=current_user.id, 
-            open_count=open_disputes_count, 
-            message="User has too many open disputes."
-        )
+    # Freeze milestone status
+    dispute_milestone_service(db, dispute.milestone_id, current_user)
 
+    # Record the dispute
     dispute_record = create_dispute(
         db,
         milestone_id=dispute.milestone_id,
-        clerk_id=current_user.id,
+        clerk_id=current_user.clerk_id,
         reason=dispute.reason
     )
 

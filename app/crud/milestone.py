@@ -1,15 +1,17 @@
 from sqlalchemy.orm import Session
-from app.models.milestone import Milestone
+from app.models.milestone import Milestone, MilestoneStatus
+from decimal import Decimal
 
 
 # Create new milestone
-def create_milestone(db: Session, title: str, description: str, amount: float, project_id: int):
+def create_milestone(db: Session, title: str, description: str, amount: Decimal, project_id: int, last_updated_by: str = None):
     milestone = Milestone(
         title=title,
         description=description,
         amount=amount,
         project_id=project_id,
-        status="pending"
+        status=MilestoneStatus.PENDING,
+        last_updated_by=last_updated_by
     )
 
     db.add(milestone)
@@ -30,11 +32,13 @@ def get_milestone_by_id(db: Session, milestone_id: int):
 
 
 # Update milestone status
-def update_milestone_status(db: Session, milestone_id: int, new_status: str):
+def update_milestone_status(db: Session, milestone_id: int, new_status: str, updated_by: str = None):
     milestone = db.query(Milestone).filter(Milestone.id == milestone_id).first()
 
     if milestone:
         milestone.status = new_status
+        if updated_by:
+            milestone.last_updated_by = updated_by
         db.commit()
         db.refresh(milestone)
 
