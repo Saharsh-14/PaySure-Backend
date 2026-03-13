@@ -40,6 +40,6 @@ def resolve_dispute_api(
     dispute_id: int,
     resolution_note: str,
     db: Session = Depends(get_db),
-    current_user = Depends(RoleChecker(["admin"]))
+    current_user = Depends(RoleChecker(["Admin"]))
 ):
     return resolve_dispute_api_service(db, dispute_id, resolution_note, current_user)

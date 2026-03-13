@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, Float, DateTime, Enum
+from sqlalchemy import Column, Integer, String, ForeignKey, Numeric, DateTime, Enum
 from sqlalchemy.orm import relationship
 import enum
 from datetime import datetime
@@ -7,10 +7,11 @@ from app.core.database import Base
 
 
 class MilestoneStatus(str, enum.Enum):
-    pending = "pending"
-    completed = "completed"
-    approved = "approved"
-    rejected = "rejected"
+    PENDING = "PENDING"
+    FUNDED = "FUNDED"
+    COMPLETED = "COMPLETED"
+    APPROVED = "APPROVED"
+    DISPUTED = "DISPUTED"
 
 
 class Milestone(Base):
@@ -21,13 +22,14 @@ class Milestone(Base):
     title = Column(String, nullable=False)
     description = Column(String, nullable=True)
 
-    amount = Column(Float, nullable=False)
+    amount = Column(Numeric(12, 2), nullable=False)
 
-    status = Column(Enum(MilestoneStatus), default=MilestoneStatus.pending)
+    status = Column(Enum(MilestoneStatus), default=MilestoneStatus.PENDING)
 
     project_id = Column(Integer, ForeignKey("projects.id"), nullable=False)
 
     created_at = Column(DateTime, default=datetime.utcnow)
+    last_updated_by = Column(String, nullable=True) # clerk_id of last modifier
 
     # Relationships
     project = relationship("Project", back_populates="milestones")

@@ -6,9 +6,12 @@ class Settings(BaseSettings):
     SECRET_KEY: str = "placeholder_secret"
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
+    CLERK_WEBHOOK_SECRET: str = "whsec_placeholder"
+    CLERK_JWKS_URL: str = "https://api.clerk.dev/v1/jwks"
 
     class Config:
-        env_file = ".env"
+        import os
+        env_file = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), ".env")
         extra = "ignore"
         
     @property

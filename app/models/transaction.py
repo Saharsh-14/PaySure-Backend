@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, Float, String, ForeignKey, DateTime, Enum
+from sqlalchemy import Column, Integer, Numeric, String, ForeignKey, DateTime, Enum
 from sqlalchemy.orm import relationship
 from datetime import datetime
 import enum
@@ -7,10 +7,10 @@ from app.core.database import Base
 
 
 class TransactionStatus(str, enum.Enum):
-    pending = "pending"
-    completed = "completed"
-    failed = "failed"
-    refunded = "refunded"
+    LOCKED = "LOCKED"
+    COMPLETED = "COMPLETED"
+    FAILED = "FAILED"
+    REFUNDED = "REFUNDED"
 
 class TransactionType(str, enum.Enum):
     deposit = "deposit"
@@ -28,9 +28,9 @@ class Transaction(Base):
     payer_id = Column(String, nullable=False, index=True)
     receiver_id = Column(String, nullable=False, index=True)
 
-    amount = Column(Float, nullable=False)
+    amount = Column(Numeric(12, 2), nullable=False)
 
-    status = Column(Enum(TransactionStatus), default=TransactionStatus.pending)
+    status = Column(Enum(TransactionStatus), default=TransactionStatus.LOCKED)
 
     transaction_type = Column(Enum(TransactionType), nullable=False)
 

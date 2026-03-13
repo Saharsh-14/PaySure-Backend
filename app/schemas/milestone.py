@@ -1,13 +1,15 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from typing import Optional
 from datetime import datetime
+from decimal import Decimal
+from app.models.milestone import MilestoneStatus
 
 
 # Base milestone schema
 class MilestoneBase(BaseModel):
     title: str = Field(..., min_length=3, max_length=100)
     description: Optional[str] = Field(None, max_length=500)
-    amount: float = Field(..., gt=0, description="Amount to be placed in escrow for this milestone")
+    amount: Decimal = Field(..., gt=0, decimal_places=2, description="Amount to be placed in escrow for this milestone")
 
 
 # Used when creating milestone
@@ -19,10 +21,8 @@ class MilestoneCreate(MilestoneBase):
 class MilestoneResponse(MilestoneBase):
     id: int
     project_id: int
-    status: str
+    status: MilestoneStatus
     created_at: datetime
+    last_updated_by: Optional[str] = None
 
-    class Config:
-        from_attributes = True  # Pydantic v2
-        # For v1 use:
-        # orm_mode = True
+    model_config = ConfigDict(from_attributes=True)

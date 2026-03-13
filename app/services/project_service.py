@@ -19,7 +19,13 @@ def create_project_service(db: Session, project: ProjectCreate, current_user):
 
 def get_my_projects_service(db: Session, current_user, skip: int = 0, limit: int = 100):
     """Business logic for retrieving user's projects."""
-    return get_projects_by_client(db, current_user.id, skip=skip, limit=limit)
+    from app.models.user import UserRole
+    if current_user.role == UserRole.CLIENT:
+        return get_projects_by_client(db, current_user.clerk_id, skip=skip, limit=limit)
+    else:
+        # Freelancer view
+        from app.models.project import Project
+        return db.query(Project).filter(Project.freelancer_id == current_user.clerk_id).offset(skip).limit(limit).all()
 
 def assign_freelancer_service(db: Session, project_id: int, freelancer_id: int, current_user):
     """Business logic for assigning a freelancer to a project."""

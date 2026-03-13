@@ -6,7 +6,6 @@ from app.core.database import get_db
 from app.schemas.milestone import MilestoneCreate, MilestoneResponse
 from app.services.milestone_service import (
     create_milestone_service,
-    get_project_milestones_service,
     mark_milestone_completed_service,
     approve_milestone_service
 )
@@ -22,7 +21,7 @@ router = APIRouter(prefix="/milestones", tags=["Milestones"])
 def create_new_milestone(
     milestone: MilestoneCreate,
     db: Session = Depends(get_db),
-    current_user = Depends(RoleChecker(["client"]))
+    current_user = Depends(RoleChecker(["Client"]))
 ):
     return create_milestone_service(db, milestone, current_user)
 
@@ -38,7 +37,9 @@ def get_project_milestones(
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user)
 ):
-    return get_project_milestones_service(db, project_id, skip=skip, limit=limit)
+    # This service was previously removed in refactor, I should re-add or call CRUD
+    from app.crud.milestone import get_milestones_by_project
+    return get_milestones_by_project(db, project_id, skip=skip, limit=limit)
 
 
 # ---------------------------
@@ -48,7 +49,7 @@ def get_project_milestones(
 def mark_completed(
     milestone_id: int,
     db: Session = Depends(get_db),
-    current_user = Depends(RoleChecker(["freelancer"]))
+    current_user = Depends(RoleChecker(["Freelancer"]))
 ):
     return mark_milestone_completed_service(db, milestone_id, current_user)
 
@@ -60,7 +61,7 @@ def mark_completed(
 def approve_milestone(
     milestone_id: int,
     db: Session = Depends(get_db),
-    current_user = Depends(RoleChecker(["client"]))
+    current_user = Depends(RoleChecker(["Client"]))
 ):
     return approve_milestone_service(db, milestone_id, current_user)
 
